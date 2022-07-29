@@ -158,7 +158,7 @@ static void perform_rebinding_with_section(struct rebindings_entry *rebindings,
              * -- Lionfore Hao Jun 11th, 2021
              **/
             //#if !__has_feature(ptrauth_calls)
-            indirect_symbol_bindings[i] = cur->rebindings[j].replacement;
+            //indirect_symbol_bindings[i] = cur->rebindings[j].replacement;
             //#else
             void *replacement = cur->rebindings[j].replacement;
             if (!strcmp(section->sectname, "__auth_got")) {
