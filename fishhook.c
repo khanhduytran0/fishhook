@@ -119,6 +119,7 @@ static void perform_rebinding_with_section(struct rebindings_entry *rebindings,
                                            section_t *section,
                                            intptr_t slide,
                                            nlist_t *symtab,
+                                           int nsyms,
                                            char *strtab,
                                            uint32_t *indirect_symtab) {
   uint32_t *indirect_symbol_indices = indirect_symtab + section->reserved1;
@@ -130,6 +131,10 @@ static void perform_rebinding_with_section(struct rebindings_entry *rebindings,
         symtab_index == (INDIRECT_SYMBOL_LOCAL   | INDIRECT_SYMBOL_ABS)) {
       continue;
     }
+    if(symtab_index >= nsyms) {
+      continue;
+    }
+
     uint32_t strtab_offset = symtab[symtab_index].n_un.n_strx;
     char *symbol_name = strtab + strtab_offset;
     bool symbol_name_longer_than_1 = symbol_name[0] && symbol_name[1];
@@ -228,11 +233,12 @@ static void rebind_symbols_for_image(struct rebindings_entry *rebindings,
       for (uint j = 0; j < cur_seg_cmd->nsects; j++) {
         section_t *sect =
           (section_t *)(cur + sizeof(segment_command_t)) + j;
+          int nsyms = symtab_cmd->nsyms;
         if ((sect->flags & SECTION_TYPE) == S_LAZY_SYMBOL_POINTERS) {
-          perform_rebinding_with_section(rebindings, sect, slide, symtab, strtab, indirect_symtab);
+          perform_rebinding_with_section(rebindings, sect, slide, symtab, nsyms, strtab, indirect_symtab);
         }
         if ((sect->flags & SECTION_TYPE) == S_NON_LAZY_SYMBOL_POINTERS) {
-          perform_rebinding_with_section(rebindings, sect, slide, symtab, strtab, indirect_symtab);
+          perform_rebinding_with_section(rebindings, sect, slide, symtab, nsyms, strtab, indirect_symtab);
         }
       }
     }
